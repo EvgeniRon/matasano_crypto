@@ -27,7 +27,7 @@ static unsigned int char2nibble (char hex) {
     return 255;
 }
 
-/* Function builds a byte array from hex string */
+/* Function: builds a byte array from hex string */
 static void hexStr2byteArr(const char *hexStr, unsigned int str_size, BYTE *byteArr){
     for (int i = 0; i < (str_size)/2 ; i++){
         byteArr[i] = char2nibble(hexStr[2*i])<< 4 | char2nibble(hexStr[2*i+1]);
@@ -63,7 +63,7 @@ BYTE *hex2base64(const char *str, unsigned int str_len){
     }
 
     
-    // Each iteration, we convert triplet set of bytes to four base64 values.
+    // At each iteration, convert triplet of bytes to four base64 values.
     for ( i = 0; i < str_len/6; i++){
         // High 6 bits alinged to lsb
         base64val[i*4] = (0xFC & byteArr[i*3]) >> 2;
@@ -72,6 +72,7 @@ BYTE *hex2base64(const char *str, unsigned int str_len){
         base64val[i*4+3] = (0x3F & byteArr[i*3+2]);
     }
     
+    // Encode each value to its corresponding base64 characters
     for ( i = 0; i< str_len*2/3; i++ ){
         if (base64val[i] <= 25)
             base64str[i] = base64val[i]  + 'A';
