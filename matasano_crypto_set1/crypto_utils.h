@@ -14,6 +14,9 @@
 
 typedef unsigned char BYTE;
 BYTE *hex2base64(const char *str, unsigned int str_len);
+BYTE *strxor(const char *stra, const char *strb, unsigned int length);
+void hexStr2byteArr(const char *hexStr, unsigned int str_size, BYTE *byteArr);
+void printByteArr(const BYTE *byteArr, unsigned length);
 
 
 

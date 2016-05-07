@@ -17,7 +17,6 @@
 
 #include "crypto_utils.h"
 static unsigned int char2nibble (char hex);
-static void hexStr2byteArr(const char *hexStr, unsigned int str_size, BYTE *byteArr);
 
 /* Function calculateד the binary value of hex char */
 static unsigned int char2nibble (char hex) {
@@ -27,13 +26,18 @@ static unsigned int char2nibble (char hex) {
     return 255;
 }
 
-/* Convert hex string to byte array */
 /* Converting each hex character to its binary representation. Than building a hex byte from two hex charcter */
-static void hexStr2byteArr(const char *hexStr, unsigned int str_size, BYTE *byteArr){
+void hexStr2byteArr(const char *hexStr, unsigned int str_size, BYTE *byteArr){
     for (int i = 0; i < (str_size)/2 ; i++){
         byteArr[i] = char2nibble(hexStr[2*i])<< 4 | char2nibble(hexStr[2*i+1]);
     }
-    
+}
+
+void printByteArr(const BYTE *byteArr, unsigned length){
+    for (int i = 0 ; i< length; i++){
+        printf("%x",byteArr[i]);
+    }
+    printf("\n");
 }
 
 /* Function: Converts hex input to base64 */
@@ -94,7 +98,28 @@ BYTE *hex2base64(const char *str, unsigned int str_len){
     return base64str;
 }
 
-
+/* Function takes two equal length buffers and produces their XOR combination*/
+BYTE *strxor(const char *stra, const char *strb, unsigned int length){
+    BYTE byte_str_a[length/2],byte_str_b[length/2];
+    unsigned int i;
+    
+    // allocate new byte array
+    BYTE *str_xor_result = (BYTE *)malloc(length/2);
+    if (str_xor_result == NULL){
+        free(str_xor_result);
+        printf("str_xor_result: Error allocating memory!\n");
+    }
+    
+    // convert hex string to byte array
+    hexStr2byteArr(stra, length, byte_str_a);
+    hexStr2byteArr(strb, length, byte_str_b);
+    
+    for (i = 0; i < length/2; i++){
+        str_xor_result[i] = byte_str_a[i] ^ byte_str_b[i];
+    }
+    
+    return str_xor_result;
+}
 
 
 
