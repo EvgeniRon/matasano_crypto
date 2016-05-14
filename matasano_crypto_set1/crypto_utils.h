@@ -11,12 +11,13 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 typedef unsigned char BYTE;
-BYTE *hex2base64(const char *str, unsigned int str_len);
-BYTE *strxor(const char *stra, const char *strb, unsigned int length);
-void hexStr2byteArr(const char *hexStr, unsigned int str_size, BYTE *byteArr);
-void printByteArr(const BYTE *byteArr, unsigned length);
+BYTE *hex2base64(const char *str, unsigned long str_len);
+BYTE *strxor(const char *stra, const char *strb, unsigned long length);
+void hexStr2byteArr(const char *hexStr, unsigned long str_size, BYTE *byteArr);
+void printByteArr(const BYTE *byteArr, unsigned long length);
 
 
 

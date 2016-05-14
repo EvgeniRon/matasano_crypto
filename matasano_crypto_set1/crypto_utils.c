@@ -27,13 +27,13 @@ static unsigned int char2nibble (char hex) {
 }
 
 /* Converting each hex character to its binary representation. Than building a hex byte from two hex charcter */
-void hexStr2byteArr(const char *hexStr, unsigned int str_size, BYTE *byteArr){
+void hexStr2byteArr(const char *hexStr, unsigned long str_size, BYTE *byteArr){
     for (int i = 0; i < (str_size)/2 ; i++){
         byteArr[i] = char2nibble(hexStr[2*i])<< 4 | char2nibble(hexStr[2*i+1]);
     }
 }
 
-void printByteArr(const BYTE *byteArr, unsigned length){
+void printByteArr(const BYTE *byteArr, unsigned long length){
     for (int i = 0 ; i< length; i++){
         printf("%x",byteArr[i]);
     }
@@ -41,7 +41,7 @@ void printByteArr(const BYTE *byteArr, unsigned length){
 }
 
 /* Function: Converts hex input to base64 */
-BYTE *hex2base64(const char *str, unsigned int str_len){
+BYTE *hex2base64(const char *str, unsigned long str_len){
     unsigned int i;
     // allocate new byte array
     BYTE *byteArr = (BYTE *)malloc(str_len/2);
@@ -99,7 +99,7 @@ BYTE *hex2base64(const char *str, unsigned int str_len){
 }
 
 /* Function takes two equal length buffers and produces their XOR combination*/
-BYTE *strxor(const char *stra, const char *strb, unsigned int length){
+BYTE *strxor(const char *stra, const char *strb, unsigned long length){
     BYTE byte_str_a[length/2],byte_str_b[length/2];
     unsigned int i;
     
