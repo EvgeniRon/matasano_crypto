@@ -7,6 +7,7 @@ http://cryptopals.com/
 
 # Current status:
 1. Convert hex to base64 - Working only on HEX strings with a lengh that is divisible by 3.
-2. Fixed XOR - Finished
-3. Single-byte XOR cipher - In progress
+2. Fixed XOR - Completed
+3. Single-byte XOR cipher - Completed
+4. Detect single-character XOR - In progress
 
