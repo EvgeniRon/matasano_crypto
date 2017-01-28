@@ -9,15 +9,23 @@
 #ifndef crypto_utils_h
 #define crypto_utils_h
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#define FALSE	0
+#define TRUE	1
 
-typedef unsigned char BYTE;
-BYTE *hex2base64(const char *str, unsigned long str_len);
-BYTE *strxor(const char *stra, const char *strb, unsigned long length);
-void hexStr2byteArr(const char *hexStr, unsigned long str_size, BYTE *byteArr);
-void printByteArr(const BYTE *byteArr, unsigned long length);
+typedef unsigned char u_int8;
+
+
+int
+hex2base64(const char *str, unsigned long str_len, u_int8 *OUT_base64);
+
+int
+strxor(const char *stra, const char *strb, unsigned int length, unsigned char *str_result);
+
+void
+hexStr2byteArr(const char *hexStr, unsigned long str_size, u_int8 *byteArr);
+
+void
+printByteArr(const u_int8 *byteArr, unsigned long length);
 
 
 
