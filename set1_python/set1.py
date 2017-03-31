@@ -4,7 +4,7 @@ from functools import reduce
 """Cryptopals Set#1"""
 import binascii
 import base64
-
+import codecs 
 
 def hex2base64(hex_str):
     """Function to convert hex string to base64 string"""
@@ -65,14 +65,14 @@ def decypher_single_byte_xor(cipher):
     key = 0
     for i in range(0, 255):
         test_key = chr(i) * len(cipher)
-        message = xor_strings(test_key, hex2b(cipher).decode())
+        message = xor_strings(test_key, hex2b(cipher).decode('utf-8'))
         key_score = score(message)
         if key_score > max_score_key:
             max_score_key = key_score
             secret_message = message
             key = i
-    print("The key is:", chr(key))
-    print("The decyphered message is:", secret_message)
+    print("Plaintext:", secret_message)
+    return (key, secret_message)
 
 
 if __name__ == "__main__":
@@ -90,7 +90,7 @@ if __name__ == "__main__":
         "SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11"
         "c2hyb29t"
     )
-    RESULT = (hex2base64(TEST_STR_CRYPOPASL)).decode()
+    RESULT = (hex2base64(TEST_STR_CRYPOPASL)).decode('utf-8')
 
     # Verify task 01
     if RESULT == RESULT_COMPARE_CRYPOPASL:
@@ -116,3 +116,12 @@ if __name__ == "__main__":
 
     CIPHER = "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736"
     decypher_single_byte_xor(CIPHER)
+
+    cypher_file = open('data/4.txt', 'rb')
+    for line in cypher_file:
+        try:
+            decypher_single_byte_xor(line.rstrip())
+        except UnicodeError:
+            pass
+
+
