@@ -1,10 +1,17 @@
 #!/usr/bin/python3.6
 from functools import reduce
+from os import urandom
+import unittest
 
 """Cryptopals Set#1"""
 import binascii
 import base64
-import math 
+import math
+
+def genkey(length):
+    """Generate key"""
+    return urandom(length)
+
 
 def hex2base64(hex_str):
     """Function to convert hex string to base64 string"""
@@ -71,7 +78,6 @@ def decypher_single_byte_xor(cipher):
             max_score_key = key_score
             secret_message = message
             key = i
-    print("Plaintext:", secret_message)
     return (key, secret_message)
 
 
@@ -79,69 +85,72 @@ def repeating_key_xor(key, text):
     """Repeating-key XOR"""
     string_key = key * math.ceil(len(text)/len(key))
     res = xor_bstrings(string_key[:len(text)].encode('utf-8'), text.encode('utf-8'))
-    return binascii.b2a_hex(res)
+    return binascii.b2a_hex(res).decode('utf-8')
+
+def hamming_distance(string_a, string_b):
+    """Calculating hamming/edit distance between two strings"""
+    if len(string_a) != len(string_b):
+        raise ValueError("Undefined for sequences of unequal length")
+    bin_string_a = bin(int(binascii.hexlify(string_a.encode()), 16))[2:]
+    bin_string_b = bin(int(binascii.hexlify(string_b.encode()), 16))[2:]
+    return sum(int(bit1, 2) ^ int(bit2, 2) for bit1, bit2 in zip(bin_string_a, bin_string_b))
 
 
 if __name__ == "__main__":
-    from os import urandom
+    class My_tests(unittest.TestCase):
 
-    def genkey(length):
-        """Generate key"""
-        return urandom(length)
+        def test_hex2base64(self):
 
-    TEST_STR_CRYPOPASL = (
-        "49276d206b696c6c696e6720796f757220627261696e206c"
-        "696b65206120706f69736f6e6f7573206d757368726f6f6d"
-    )
-    RESULT_COMPARE_CRYPOPASL = (
-        "SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11"
-        "c2hyb29t"
-    )
-    RESULT = (hex2base64(TEST_STR_CRYPOPASL)).decode('utf-8')
+            TEST_STR_CRYPOPASL = (
+                "49276d206b696c6c696e6720796f757220627261696e206c"
+                "696b65206120706f69736f6e6f7573206d757368726f6f6d"
+            )
+            RESULT_COMPARE_CRYPOPASL = (
+                "SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11"
+                "c2hyb29t"
+            )
+            self.assertEqual(hex2base64(TEST_STR_CRYPOPASL).decode('utf-8'), RESULT_COMPARE_CRYPOPASL)
 
-    # Verify task 01
-    if RESULT == RESULT_COMPARE_CRYPOPASL:
-        print('PASSED: Encoding base64 string ')
-    else:
-        print(' Failed')
+        def test_xor_strings(self):
 
-    MESSAGE = 'This is a secret message'
-    print('message:', MESSAGE)
+            MESSAGE = 'This is a secret message'
+            KEY = genkey(len(MESSAGE))
+            CIPHERTEXT = xor_strings(MESSAGE, KEY)
+            self.assertEqual(xor_strings(CIPHERTEXT, KEY), MESSAGE)
 
-    KEY = genkey(len(MESSAGE))
-    print('key:', KEY)
+        def test_decypher_single_byte_xor(self):
 
-    CIPHERTEXT = xor_strings(MESSAGE, KEY)
-    print('cipherText:', CIPHERTEXT)
-    print('decrypted:', xor_strings(CIPHERTEXT, KEY))
+            CIPHER = "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736"
+            PLAINTEXT = "Cooking MC's like a pound of bacon"
+            self.assertEqual(decypher_single_byte_xor(CIPHER)[1], PLAINTEXT)
+
+        def test_on_file_decypher_single_byte_xor(self):
+
+            PLAINTEXT = "Now that the party is jumping\n"
+            cypher_file = open('data/4.txt', 'rb')
+            for line in cypher_file:
+                try:
+                    res = decypher_single_byte_xor(line.rstrip())[1]
+                    if  res == PLAINTEXT:
+                        break
+                except UnicodeError:
+                    pass
+            cypher_file.close()
+
+            self.assertEqual(res, PLAINTEXT)
+
+        def test_repeating_key_xor(self):
+
+            TEXT = "Burning 'em, if you ain't quick and nimble\nI go crazy when I hear a cymbal"
+            CIPHER = ("0b3637272a2b2e63622c2e69692a23693a2a3c6324202d623d63343c2a26226324272765"
+                      "272a282b2f20430a652e2c652a3124333a653e2b2027630c692b20283165286326302e27282f")
+            KEY = "ICE"
+            self.assertEqual(repeating_key_xor(KEY, TEXT), CIPHER)
 
 
-    # Verify task 02
-    if xor_strings(CIPHERTEXT, KEY) == MESSAGE:
-        print('Unit test xor_strings: passed')
-    else:
-        print('Unit test xor_strings: failed')
+            def test_hamming_distance(self):
+                STRING_TEST1 = "this is a test"
+                STRING_TEST2 = "wokka wokka!!!"
+                self.assertEqual(hamming_distance(STRING_TEST1, STRING_TEST2), 36)
 
-    CIPHER = "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736"
-    decypher_single_byte_xor(CIPHER)
-
-    cypher_file = open('data/4.txt', 'rb')
-    for line in cypher_file:
-        try:
-            decypher_single_byte_xor(line.rstrip())
-        except UnicodeError:
-            pass
-
-
-    TEXT = "Burning 'em, if you ain't quick and nimble\nI go crazy when I hear a cymbal"
-    CIPHER = ("0b3637272a2b2e63622c2e69692a23693a2a3c6324202d623d63343c2a26226324272765272a282b2f20430a652e2c652a312"
-              "4333a653e2b2027630c692b20283165286326302e27282f")
-    KEY = "ICE"
-    res = repeating_key_xor(KEY, TEXT)
-
-    if (res.decode('utf-8')) == CIPHER:
-        print('Unit test: repeating_key_xor passed')
-    else:
-        print('Unit test: repeating_key_xor failed')
-        print(res.decode('utf-8'))
-        print(CIPHER)
+    unittest.main()
