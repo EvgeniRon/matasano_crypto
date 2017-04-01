@@ -4,7 +4,7 @@ from functools import reduce
 """Cryptopals Set#1"""
 import binascii
 import base64
-import codecs 
+import math 
 
 def hex2base64(hex_str):
     """Function to convert hex string to base64 string"""
@@ -75,6 +75,13 @@ def decypher_single_byte_xor(cipher):
     return (key, secret_message)
 
 
+def repeating_key_xor(key, text):
+    """Repeating-key XOR"""
+    string_key = key * math.ceil(len(text)/len(key))
+    res = xor_bstrings(string_key[:len(text)].encode('utf-8'), text.encode('utf-8'))
+    return binascii.b2a_hex(res)
+
+
 if __name__ == "__main__":
     from os import urandom
 
@@ -108,6 +115,7 @@ if __name__ == "__main__":
     print('cipherText:', CIPHERTEXT)
     print('decrypted:', xor_strings(CIPHERTEXT, KEY))
 
+
     # Verify task 02
     if xor_strings(CIPHERTEXT, KEY) == MESSAGE:
         print('Unit test xor_strings: passed')
@@ -125,3 +133,15 @@ if __name__ == "__main__":
             pass
 
 
+    TEXT = "Burning 'em, if you ain't quick and nimble\nI go crazy when I hear a cymbal"
+    CIPHER = ("0b3637272a2b2e63622c2e69692a23693a2a3c6324202d623d63343c2a26226324272765272a282b2f20430a652e2c652a312"
+              "4333a653e2b2027630c692b20283165286326302e27282f")
+    KEY = "ICE"
+    res = repeating_key_xor(KEY, TEXT)
+
+    if (res.decode('utf-8')) == CIPHER:
+        print('Unit test: repeating_key_xor passed')
+    else:
+        print('Unit test: repeating_key_xor failed')
+        print(res.decode('utf-8'))
+        print(CIPHER)
