@@ -182,7 +182,7 @@ def decipher_repeating_xor_key_encryption(file, top_n_key_sizes, max_key_size, n
         content = base64.b64decode(content).decode()
 
     key_sizes_stats = guess_keysize(content, max_key_size, num_of_elements)
-    key_sizes_sorted = sorted(range(len(key_sizes_stats)), key = lambda k: key_sizes_stats[k])
+    key_sizes_sorted = sorted(range(len(key_sizes_stats)), key = lambda k:key_sizes_stats[k])
     for key_size_index in range(top_n_key_sizes):
         divided_content = []
         transposed_divided_content = []
@@ -267,17 +267,22 @@ class My_tests(unittest.TestCase):
         divided_content = list(divide_to_nlength_strings(STRING_TEST1, KEY_SIZE))
         self.assertEqual(len(divided_content), len(STRING_TEST1)/KEY_SIZE)
 
-        #TODO: def test_transpose_list
-        #TODO: def test_decipher_block
+    def test_transpose_list(self):
+        
+        STRING_TEST1 = ['11', '22', '33', '44']
+        KEY_SIZE = 2
+        transposed_divided_content = transpose_list(STRING_TEST1, KEY_SIZE)
+        self.assertEqual(len(transposed_divided_content), len(STRING_TEST1[0]))
 
+    def test_decipher_repeating_xor_key_encryption(self):
+        top_results = 5
+        max_key_size = 40
+        num_of_elements = 4
+        decipher_repeating_xor_key_encryption("data/6.txt", top_results, max_key_size, num_of_elements)
 
 if __name__ == "__main__":
     suite = unittest.TestSuite()
-    suite.addTest(My_tests("test_divide_to_nlength_strings"))
+    suite.addTest(My_tests("test_transpose_list"))
     runner = unittest.TextTestRunner()
     runner.run(suite)
-    #top_results = 5
-    #max_key_size = 40
-    #num_of_elements = 4
-    #decipher_repeating_xor_key_encryption("data/6.txt", top_results, max_key_size, num_of_elements)
 
