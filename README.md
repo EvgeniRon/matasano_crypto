@@ -1,5 +1,6 @@
 # matasano_crypto
-Matasano crypto challenge solutions
+Matasano crypto challenge solutions. 
+Straigh forward solution. File per set, all challenges implemented as a test case in unittest.
 
 A collection of 48 exercises that demonstrate attacks on real-world crypto.
 
@@ -12,4 +13,5 @@ http://cryptopals.com/
 4. Detect single-character XOR - Completed
 5. Implement repeating-key XOR - Completed
 6. Break repeating-key XOR - Completed
-7. AES in ECB mode - In progress
+7. AES in ECB mode - Completed
+8. Detect AES in ECB mode - In progress
