@@ -9,6 +9,14 @@ import time
 import binascii
 import base64
 import math
+from Crypto.Cipher import AES
+
+def openb64_file(file_b64):
+    """Open a base64 file"""
+    with open(file_b64, 'r') as f:
+        content = f.read()
+        content = content.replace('\n', '')
+    return base64.b64decode(content)
 
 def genkey(length):
     """Generate key"""
@@ -24,7 +32,7 @@ def hex2base64(hex_str):
 def hex2b(hex):
     size = len(hex)
     if size%2:
-        res = binascii.b2a_hex(bin(int(hex,16))[2:].encode())
+        res = binascii.b2a_hex(bin(int(hex, 16))[2:].encode())
     else:
         res = binascii.unhexlify(hex)
     return  res
@@ -36,7 +44,7 @@ def u_ord(charcter):
 
 def xor_strings(str_a, str_b):
     """XOR two strings together"""
-    return "".join(chr((ord(a) ^ ord(b))) for a,b in zip (list(str_a), list(str_b)))
+    return "".join(chr((ord(a) ^ ord(b))) for a, b in zip(list(str_a), list(str_b)))
 
 def xor_strings_legacy(str_a, str_b):
     """XOR two strings together https://en.wikipedia.org/wiki/XOR_cipher"""
@@ -176,13 +184,14 @@ def decipher_blocks(transposed_block_list):
 
 def decipher_repeating_xor_key_encryption(file, top_n_key_sizes, max_key_size, num_of_elements):
     """Break repeating-key xor"""
-    with open(file, 'r') as f:
-        content = f.read()
-        content = content.replace('\n', '')
-        content = base64.b64decode(content).decode()
+    content = openb64_file(file)
+    #with open(file, 'r') as f:
+     #   content = f.read()
+      #  content = content.replace('\n', '')
+       # content = base64.b64decode(content).decode()
 
-    key_sizes_stats = guess_keysize(content, max_key_size, num_of_elements)
-    key_sizes_sorted = sorted(range(len(key_sizes_stats)), key = lambda k:key_sizes_stats[k])
+    key_sizes_stats = guess_keysize(content.decode(), max_key_size, num_of_elements)
+    key_sizes_sorted = sorted(range(len(key_sizes_stats)), key=lambda k: key_sizes_stats[k])
     for key_size_index in range(top_n_key_sizes):
         divided_content = []
         transposed_divided_content = []
@@ -196,6 +205,10 @@ def decipher_repeating_xor_key_encryption(file, top_n_key_sizes, max_key_size, n
             with open("".join([str(text_score), ".txt"]), 'w') as fw:
                 fw.write(text)
         print("key is: ", key, "score is: ", text_score)
+
+def decrypt_AES_in_ECB_mode(ciphertext, key, IV):
+    decryption_suite = AES.new(key, AES.MODE_ECB, IV)
+    return decryption_suite.decrypt(ciphertext)
 
 
 class My_tests(unittest.TestCase):
@@ -268,21 +281,33 @@ class My_tests(unittest.TestCase):
         self.assertEqual(len(divided_content), len(STRING_TEST1)/KEY_SIZE)
 
     def test_transpose_list(self):
-        
+
         STRING_TEST1 = ['11', '22', '33', '44']
         KEY_SIZE = 2
         transposed_divided_content = transpose_list(STRING_TEST1, KEY_SIZE)
         self.assertEqual(len(transposed_divided_content), len(STRING_TEST1[0]))
 
     def test_decipher_repeating_xor_key_encryption(self):
+
         top_results = 5
         max_key_size = 40
         num_of_elements = 4
         decipher_repeating_xor_key_encryption("data/6.txt", top_results, max_key_size, num_of_elements)
 
+    def test_decrypt_AES_in_ECB_mode(self):
+
+        key = "YELLOW SUBMARINE"
+        IV = 16 * '\x00'
+        cipher_file = "data/7.txt"
+        ciphertext = openb64_file(cipher_file)
+        plaintext = decrypt_AES_in_ECB_mode(ciphertext, key, IV)
+        self.assertEquals(len(plaintext), 2880)
+
+
+
 if __name__ == "__main__":
     suite = unittest.TestSuite()
-    suite.addTest(My_tests("test_transpose_list"))
+    suite.addTest(My_tests("test_decrypt_AES_in_ECB_mode"))
     runner = unittest.TextTestRunner()
     runner.run(suite)
 
