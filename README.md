@@ -11,5 +11,5 @@ http://cryptopals.com/
 3. Single-byte XOR cipher - Completed
 4. Detect single-character XOR - Completed
 5. Implement repeating-key XOR - Completed
-6. Break repeating-key XOR - In progress
-
+6. Break repeating-key XOR - Completed
+7. AES in ECB mode - In progress
