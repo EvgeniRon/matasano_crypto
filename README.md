@@ -14,4 +14,4 @@ http://cryptopals.com/
 5. Implement repeating-key XOR - Completed
 6. Break repeating-key XOR - Completed
 7. AES in ECB mode - Completed
-8. Detect AES in ECB mode - In progress
+8. Detect AES in ECB mode - Completed
