@@ -332,7 +332,8 @@ class My_tests(unittest.TestCase):
                 index = index + 1
                 if res:
                     print("Index: ", index, "AES in ECB: ", res, "\ncipher: ", cipher)
-
+                    break
+        self.assertTrue(res)
 
 if __name__ == "__main__":
     suite = unittest.TestSuite()
