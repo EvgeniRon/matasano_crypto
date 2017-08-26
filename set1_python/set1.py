@@ -1,4 +1,4 @@
-#!/usr/bin/python3.6
+#!/usr/bin/env python3
 from functools import reduce
 import sys
 from os import urandom
@@ -211,6 +211,24 @@ def decrypt_AES_in_ECB_mode(ciphertext, key, IV):
     return decryption_suite.decrypt(ciphertext)
 
 
+def detect_AES_in_ECB_ciphertext(cipher_text):
+
+    KEY_SIZE = 32
+    count = {}
+    divided_content = list(divide_to_nlength_strings(cipher_text, KEY_SIZE))
+    divided_content_length = len(divided_content)
+    cnt = 0
+    for block in divided_content:
+        if block not in count:
+            count[block] = 1
+            cnt = cnt + 1
+    if divided_content_length > cnt:
+        return True
+    else:
+        return False
+
+
+
 class My_tests(unittest.TestCase):
 
     def test_hex2base64(self):
@@ -303,11 +321,22 @@ class My_tests(unittest.TestCase):
         plaintext = decrypt_AES_in_ECB_mode(ciphertext, key, IV)
         self.assertEquals(len(plaintext), 2880)
 
+    def test_detect_AES_in_ECB_ciphertext(self):
+
+        cipher_file = "data/8.txt"
+        index = 0
+        with open(cipher_file, 'r') as f:
+            content = f.readlines()
+            for cipher in content:
+                res = detect_AES_in_ECB_ciphertext(cipher.rstrip())
+                index = index + 1
+                if res:
+                    print("Index: ", index, "AES in ECB: ", res, "\ncipher: ", cipher)
 
 
 if __name__ == "__main__":
     suite = unittest.TestSuite()
-    suite.addTest(My_tests("test_decrypt_AES_in_ECB_mode"))
+    suite.addTest(My_tests("test_detect_AES_in_ECB_ciphertext"))
     runner = unittest.TextTestRunner()
     runner.run(suite)
 
