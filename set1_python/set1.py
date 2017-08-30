@@ -206,8 +206,8 @@ def decipher_repeating_xor_key_encryption(file, top_n_key_sizes, max_key_size, n
                 fw.write(text)
         print("key is: ", key, "score is: ", text_score)
 
-def decrypt_AES_in_ECB_mode(ciphertext, key, IV):
-    decryption_suite = AES.new(key, AES.MODE_ECB, IV)
+def decrypt_AES_in_ECB_mode(ciphertext, key):
+    decryption_suite = AES.new(key, AES.MODE_ECB)
     return decryption_suite.decrypt(ciphertext)
 
 
