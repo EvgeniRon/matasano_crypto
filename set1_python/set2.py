@@ -108,10 +108,7 @@ class My_tests(unittest.TestCase):
         IV = 16 * '\x00'
         ciphertext = set1.openb64_file(cipher_file)
         plaintext = decrypt_aes_in_cbc_mode(ciphertext, key.encode(), IV.encode())
-        if 'Play' in plaintext.decode():
-            self.assertTrue(True)
-        else:
-            self.assertTrue(False)
+        self.assertTrue(plaintext.decode().find('Play'))
 
 if __name__ == "__main__":
     suite = unittest.TestSuite()
