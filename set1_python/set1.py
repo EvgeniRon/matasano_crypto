@@ -101,7 +101,7 @@ def decypher_single_byte_xor(cipher):
 
 def repeating_key_xor(key, text):
     """Repeating-key XOR"""
-    string_key = key * math.ceil(len(text)/len(key))
+    string_key = key * int(math.ceil(len(text)/len(key)))
     return xor_strings(string_key, text)
 
 
@@ -196,10 +196,10 @@ def decipher_repeating_xor_key_encryption(file, top_n_key_sizes, max_key_size, n
         divided_content = []
         transposed_divided_content = []
         key_size = 2 + key_sizes_sorted[key_size_index]
-        divided_content = list(divide_to_nlength_strings(content, key_size))
+        divided_content = list(divide_to_nlength_strings(content.decode(), key_size))
         transposed_divided_content = transpose_list(divided_content, key_size)
         key = decipher_blocks(transposed_divided_content)
-        text = repeating_key_xor(key, content)
+        text = repeating_key_xor(key, content.decode())
         text_score = score(text)
         if text_score > 0:
             with open("".join([str(text_score), ".txt"]), 'w') as fw:
@@ -211,9 +211,9 @@ def decrypt_AES_in_ECB_mode(ciphertext, key):
     return decryption_suite.decrypt(ciphertext)
 
 
-def detect_AES_in_ECB_ciphertext(cipher_text):
+def detect_AES_in_ECB_ciphertext(cipher_text, block_size):
 
-    KEY_SIZE = 32
+    KEY_SIZE = block_size
     count = {}
     divided_content = list(divide_to_nlength_strings(cipher_text, KEY_SIZE))
     divided_content_length = len(divided_content)
@@ -226,8 +226,6 @@ def detect_AES_in_ECB_ciphertext(cipher_text):
         return True
     else:
         return False
-
-
 
 class My_tests(unittest.TestCase):
 
@@ -308,9 +306,9 @@ class My_tests(unittest.TestCase):
     def test_decipher_repeating_xor_key_encryption(self):
 
         top_results = 5
-        max_key_size = 40
+        max_key_size = 4
         num_of_elements = 4
-        decipher_repeating_xor_key_encryption("data/6.txt", top_results, max_key_size, num_of_elements)
+        decipher_repeating_xor_key_encryption("data/cipher.txt", top_results, max_key_size, num_of_elements)
 
     def test_decrypt_AES_in_ECB_mode(self):
 
@@ -328,7 +326,7 @@ class My_tests(unittest.TestCase):
         with open(cipher_file, 'r') as f:
             content = f.readlines()
             for cipher in content:
-                res = detect_AES_in_ECB_ciphertext(cipher.rstrip())
+                res = detect_AES_in_ECB_ciphertext(cipher.rstrip(), 32)
                 index = index + 1
                 if res:
                     print("Index: ", index, "AES in ECB: ", res, "\ncipher: ", cipher)
