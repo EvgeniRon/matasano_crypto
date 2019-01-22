@@ -6,8 +6,8 @@ import random
 import unittest
 import binascii
 import base64
-from Crypto.Cipher import AES
 import secrets
+from Crypto.Cipher import AES
 import set1
 
 def pkcs7_padding(plaintext, block_size):
@@ -15,7 +15,7 @@ def pkcs7_padding(plaintext, block_size):
     padding_length = block_size - len(plaintext) % block_size
     pad = padding_length * chr(padding_length)
     return b''.join([plaintext, pad.encode()])
-    
+
 def pkcs7_encode(block, boundry):
     """Padding is in whole bytes. The value of each added byte is the number of bytes that are added, i.e. N bytes, each
     of value N are added. The number of bytes added will depend on the block boundary to which the message needs to be
@@ -147,16 +147,19 @@ def detect_oracle_encryption(oracle):
         return "CBC"
 
 class AESEncryptionOracle:
-    """ Encrypt Input and a secret message """
-    """ AES_ECB(INPUT + SECRET, KEY) """
+    """ Encrypt Input and a secret message - AES_ECB(INPUT + SECRET, KEY) """
     def __init__(self, secret_message):
         self.__key = get_random_bytes()
         self.secret_message = secret_message
         self.__mode = "ECB"
+        self.__plaintext = ""
+        self.cipher = ""
 
     def encrypt(self, message):
         """ Encrypt a message """
-        self.__plaintext = message.encode() + base64.b64decode(self.secret_message + '=' * (-len(self.secret_message) % 4)) 
+        self.__plaintext = message.encode() + base64.b64decode(self.secret_message + '=' * \
+        (-len(self.secret_message) % 4))
+
         self.cipher = encrypt_aes_in_ecb_mode(self.__plaintext, self.__key)
         return self.cipher
 
@@ -166,23 +169,51 @@ class AESEncryptionOracle:
 
 def discover_block_size(oracle, bs_limit):
     """ Discover block size of the encryption """
-    for bs in range(1, bs_limit):
-        bs_string = "A" * bs
-        bs_string_double = bs_string * 2
-        cipher_a = oracle.encrypt(bs_string)
-        cipher_b = oracle.encrypt(bs_string_double)
-        if cipher_a in cipher_b[bs:]:
-            return bs
+    i = 1
+    cipher_length = len(oracle.encrypt(""))
+    while i < bs_limit:
+        new_cipher = "A" * i
+        new_cipher_length = len(oracle.encrypt(new_cipher))
+        block_size = new_cipher_length - cipher_length
+        if block_size:
+            return block_size
+        i += 1
 
     return 0
-#def byte_at_a_time_ecb_simple(aes_oracle):
-#    """ Discover secret message - AES byte at a time """
+
+def get_secret_message_length(oracle):
+    """ Discover secret message length """
+    cipher_length = oracle.encrypt("")
+    i = 1
+    while True:
+        new_cipher = "A" * i
+        new_cipher_length = len(oracle.encrypt(new_cipher))
+        if new_cipher_length != cipher_length:
+            return new_cipher_length - i
+        i += 1
+
+def byte_at_a_time_ecb_simple(aes_oracle):
+    """ Discover secret message - AES byte at a time """
+
+    # Detect encryption block size
+    block_size = discover_block_size(aes_oracle, 30)
+    if block_size == 0:
+        return "Block size not found"
+
+    # Detect encryption type
+    encryption_type = detect_oracle_encryption(aes_oracle)
+    if encryption_type != "ECB":
+        return "Uknown encryption: " + encryption_type
+
+    # Detect Secret messege size
+    secret_message_size = len(aes_oracle.encrypt("A")) - 1
 
 
-    
 
 
-class My_tests(unittest.TestCase):
+
+
+class MyTests(unittest.TestCase):
     """ Test Set2 methods """
 
     def test_pkcs7_encode(self):
@@ -262,11 +293,18 @@ class My_tests(unittest.TestCase):
         block_size = discover_block_size(oracle, 40)
         self.assertEqual(block_size, 16)
 
+    def test_byte_at_a_time_ecb_simple(self):
+        """ Test byte at a time attack on AES encryption """
+        oracle = AESEncryptionOracle(
+            "Um9sbGluJyBpbiBteSA1LjAKV2l0aCBteSByYWctdG9wIGRvd24gc28gbXkgaGFpciBjYW4gYmxvdwpUaGUgZ2lybGllcyBvbiBzdGFuZGJ5IHdhdmluZyBqdXN0IHRvIHNheSBoaQpEaWQgeW91IHN0b3A/IE5vLCBJIGp1c3QgZHJvdmUgYnkK"
+        )
+
+        byte_at_a_time_ecb_simple(oracle)
 
 
 if __name__ == "__main__":
     suite = unittest.TestSuite()
-    suite.addTest(My_tests("test_discover_block_size"))
+    suite.addTest(MyTests("test_byte_at_a_time_ecb_simple"))
     runner = unittest.TextTestRunner()
     runner.run(suite)
     #unittest.main()
