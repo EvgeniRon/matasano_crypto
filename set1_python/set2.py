@@ -146,7 +146,39 @@ def detect_oracle_encryption(oracle):
     else:
         return "CBC"
 
-def byte_at_a_time_ecb_simple():
+class AESEncryptionOracle:
+    """ Encrypt Input and a secret message """
+    """ AES_ECB(INPUT + SECRET, KEY) """
+    def __init__(self, secret_message):
+        self.__key = get_random_bytes()
+        self.secret_message = secret_message
+        self.__mode = "ECB"
+
+    def encrypt(self, message):
+        """ Encrypt a message """
+        self.__plaintext = message.encode() + base64.b64decode(self.secret_message + '=' * (-len(self.secret_message) % 4)) 
+        self.cipher = encrypt_aes_in_ecb_mode(self.__plaintext, self.__key)
+        return self.cipher
+
+    def get_plaintext(self):
+        """ Returns the message after concatenating to it random bytes """
+        return self.__plaintext
+
+def discover_block_size(oracle, bs_limit):
+    """ Discover block size of the encryption """
+    for bs in range(1, bs_limit):
+        bs_string = "A" * bs
+        bs_string_double = bs_string * 2
+        cipher_a = oracle.encrypt(bs_string)
+        cipher_b = oracle.encrypt(bs_string_double)
+        if cipher_a in cipher_b[bs:]:
+            return bs
+
+    return 0
+#def byte_at_a_time_ecb_simple(aes_oracle):
+#    """ Discover secret message - AES byte at a time """
+
+
     
 
 
@@ -220,16 +252,23 @@ class My_tests(unittest.TestCase):
         oracle_ecb = EncryptionOracle("ECB")
         result = detect_oracle_encryption(oracle_ecb)
         self.assertEqual(result, oracle_ecb.get_mode())
-        oracle_cbc= EncryptionOracle("CBC")
+        oracle_cbc = EncryptionOracle("CBC")
         result = detect_oracle_encryption(oracle_cbc)
         self.assertEqual(result, oracle_cbc.get_mode())
 
+    def test_discover_block_size(self):
+        """Test block size discovery"""
+        oracle = AESEncryptionOracle("My secret message")
+        block_size = discover_block_size(oracle, 40)
+        self.assertEqual(block_size, 16)
+
+
 
 if __name__ == "__main__":
-    #suite = unittest.TestSuite()
-    #suite.addTest(My_tests("test_detect_oracle_encryption"))
-    #runner = unittest.TextTestRunner()
-    #runner.run(suite)
-    unittest.main()
+    suite = unittest.TestSuite()
+    suite.addTest(My_tests("test_discover_block_size"))
+    runner = unittest.TextTestRunner()
+    runner.run(suite)
+    #unittest.main()
 
 
