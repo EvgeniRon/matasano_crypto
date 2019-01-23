@@ -15,3 +15,8 @@ http://cryptopals.com/
 6. Break repeating-key XOR - Completed
 7. AES in ECB mode - Completed
 8. Detect AES in ECB mode - Completed
+9. Implement PKCS#7 padding - Completed
+10. Implement CBC mode - Completed
+11. An ECB/CBC detection oracle - Completed
+12. Byte-at-a-time ECB decryption (Simple) - Completed
+13. ECB cut-and-paste - WIP
