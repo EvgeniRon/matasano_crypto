@@ -191,7 +191,7 @@ def get_secret_message_length(oracle):
         if new_cipher_length != cipher_length:
             return new_cipher_length - i
         i += 1
-
+    
 def byte_at_a_time_ecb_simple(aes_oracle):
     """ Discover secret message - AES byte at a time """
 
@@ -206,10 +206,17 @@ def byte_at_a_time_ecb_simple(aes_oracle):
         return "Uknown encryption: " + encryption_type
 
     # Detect Secret messege size
-    secret_message_size = len(aes_oracle.encrypt("A")) - 1
-
-
-
+    secret_message_size = (get_secret_message_length(aes_oracle)//block_size + 1) * block_size
+    secret_message = bytearray()
+    for input_length in range(secret_message_size - 1, 0 , -1):
+        user_message = "A" * input_length
+        target_cipher_text = aes_oracle.encrypt(user_message)
+        for letter in range(256):
+            candidate_cipher = aes_oracle.encrypt(user_message + chr(letter))
+            if candidate_cipher == target_cipher_text:
+                secret_message += chr(letter)
+                print("secret message is: " + secret_message)
+                return 0
 
 
 
