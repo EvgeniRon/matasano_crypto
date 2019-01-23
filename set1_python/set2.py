@@ -191,7 +191,7 @@ def get_secret_message_length(oracle):
         if new_cipher_length != cipher_length:
             return new_cipher_length - i
         i += 1
-    
+
 def byte_at_a_time_ecb_simple(aes_oracle):
     """ Discover secret message - AES byte at a time """
 
@@ -207,17 +207,19 @@ def byte_at_a_time_ecb_simple(aes_oracle):
 
     # Detect Secret messege size
     secret_message_size = (get_secret_message_length(aes_oracle)//block_size + 1) * block_size
-    secret_message = bytearray()
-    for input_length in range(secret_message_size - 1, 0 , -1):
+
+    # Crack the secret message
+    secret_message = ""
+    for input_length in range(secret_message_size - 1, 0, -1):
         user_message = "A" * input_length
         target_cipher_text = aes_oracle.encrypt(user_message)
         for letter in range(256):
-            candidate_cipher = aes_oracle.encrypt(user_message + chr(letter))
-            if candidate_cipher == target_cipher_text:
+            candidate_cipher = aes_oracle.encrypt(user_message + secret_message + chr(letter))
+            if candidate_cipher[:secret_message_size] == target_cipher_text[:secret_message_size]:
                 secret_message += chr(letter)
-                print("secret message is: " + secret_message)
-                return 0
+                break
 
+    return secret_message
 
 
 class MyTests(unittest.TestCase):
@@ -302,11 +304,14 @@ class MyTests(unittest.TestCase):
 
     def test_byte_at_a_time_ecb_simple(self):
         """ Test byte at a time attack on AES encryption """
-        oracle = AESEncryptionOracle(
-            "Um9sbGluJyBpbiBteSA1LjAKV2l0aCBteSByYWctdG9wIGRvd24gc28gbXkgaGFpciBjYW4gYmxvdwpUaGUgZ2lybGllcyBvbiBzdGFuZGJ5IHdhdmluZyBqdXN0IHRvIHNheSBoaQpEaWQgeW91IHN0b3A/IE5vLCBJIGp1c3QgZHJvdmUgYnkK"
-        )
-
-        byte_at_a_time_ecb_simple(oracle)
+        secret_messege_b64 = """Um9sbGluJyBpbiBteSA1LjAKV2l0aCBteSByYWctdG9wIGRvd24gc28gbXkgaGFpciBjYW4gYmxvdwpU
+                                aGUgZ2lybGllcyBvbiBzdGFuZGJ5IHdhdmluZyBqdXN0IHRvIHNheSBoaQpEaWQgeW91IHN0b3A/IE5v
+                                LCBJIGp1c3QgZHJvdmUgYnkK"""
+        secret_messege_b64_decoded = base64.b64decode(secret_messege_b64).decode()
+        secret_messege_length = len(secret_messege_b64_decoded)
+        oracle = AESEncryptionOracle(secret_messege_b64)
+        secret_message = byte_at_a_time_ecb_simple(oracle)
+        self.assertEqual(secret_message[:secret_messege_length], secret_messege_b64_decoded)
 
 
 if __name__ == "__main__":
